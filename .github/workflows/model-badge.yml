@@ -1,0 +1,16 @@
+name: generate-model-badge
+
+on: push
+
+jobs:
+  generate-model-badge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Generate model badge
+        uses: DSD-DBS/py-capellambse/ci-templates/github/model-complexity-badge@master
+        with:
+          entrypoint: ${{ env.ENTRYPOINT }}
+    env:
+      ENTRYPOINT: "./5G NR 手机直连TP试验卫星.aird"
