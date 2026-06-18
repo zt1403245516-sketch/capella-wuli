@@ -11,28 +11,92 @@ jobs:
   generate-model-badge:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 显式声明写入权限
+      contents: write
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false  # 关键：不要用checkout的默认凭证
       
-      # 第一步：只生成徽章，不提交（官方Action只做生成）
-      - name: Generate model badge (only generate, no push)
-        uses: DSD-DBS/py-capellambse/ci-templates/github/model-complexity-badge@master
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          entrypoint: "./5G NR 手机直连TP试验卫星.aird"
+          python-version: '3.11'
       
-      # 第二步：用专门的提交Action推送（最稳定，100%解决权限问题）
-      - name: Commit and push badge
+      - name: Install capellambse
+        run: pip install capellambse
+      
+      # ========== 核心：我们自己生成SVG，完全可控 ==========
+      - name: Generate badge (our own script)
+        run: |
+          python3 << 'EOF'
+          from capellambse import MelodyModel
+          
+          AIRD_FILE = "./5G NR 手机直连TP试验卫星.aird"
+          OUTPUT = "./model-complexity-badge.svg"
+          
+          print("🔄 加载模型...")
+          model = MelodyModel(AIRD_FILE)
+          
+          # 计算复杂度
+          total = len(model.all_elements)
+          diagrams = len(model.diagrams)
+          
+          try:
+              functions = len(model.oa.functions) if hasattr(model.oa, 'functions') else 0
+          except:
+              functions = 0
+          try:
+              components = len(model.la.components) if hasattr(model.la, 'components') else 0
+          except:
+              components = 0
+          try:
+              interfaces = len(model.la.interfaces) if hasattr(model.la, 'interfaces') else 0
+          except:
+              interfaces = 0
+          
+          score = functions * 2 + components * 3 + interfaces * 4
+          
+          print(f"✅ 复杂度: {score}")
+          print(f"   元素: {total}, 功能: {functions}, 组件: {components}, 接口: {interfaces}, 图表: {diagrams}")
+          
+          # 颜色
+          if score < 50:
+              color = "#4c1"
+          elif score < 150:
+              color = "#fe7d37"
+          else:
+              color = "#e05d44"
+          
+          # 生成SVG
+          svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="190" height="20">
+            <linearGradient id="b" x2="0" y2="100%">
+              <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+              <stop offset="1" stop-opacity=".1"/>
+            </linearGradient>
+            <mask id="a">
+              <rect width="190" height="20" rx="3" fill="#fff"/>
+            </mask>
+            <g mask="url(#a)">
+              <path fill="#555" d="M0 0h110v20H0z"/>
+              <path fill="{color}" d="M110 0h80v20H110z"/>
+              <path fill="url(#b)" d="M0 0h190v20H0z"/>
+            </g>
+            <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="110">
+              <text x="550" y="140" transform="scale(.1)" textLength="700">complexity</text>
+              <text x="1500" y="140" transform="scale(.1)" textLength="400">{score}</text>
+            </g>
+          </svg>'''
+          
+          with open(OUTPUT, "w") as f:
+              f.write(svg)
+          print("✅ SVG 已生成")
+          EOF
+      
+      # 用最稳定的方式提交
+      - name: Commit and push
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: GitHub Action Bot
-          author_email: action@github.com
           message: "🔄 Auto-update model complexity badge"
           add: "model-complexity-badge.svg"
-          push: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
