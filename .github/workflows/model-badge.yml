@@ -25,8 +25,7 @@ jobs:
       - name: Install capellambse
         run: pip install capellambse
       
-      # ========== 核心：我们自己生成SVG，完全可控 ==========
-      - name: Generate badge (our own script)
+      - name: Generate badge
         run: |
           python3 << 'EOF'
           from capellambse import MelodyModel
@@ -34,10 +33,9 @@ jobs:
           AIRD_FILE = "./5G NR 手机直连TP试验卫星.aird"
           OUTPUT = "./model-complexity-badge.svg"
           
-          print("🔄 加载模型...")
+          print("🔄 Loading model...")
           model = MelodyModel(AIRD_FILE)
           
-          # 计算复杂度
           total = len(model.all_elements)
           diagrams = len(model.diagrams)
           
@@ -56,10 +54,9 @@ jobs:
           
           score = functions * 2 + components * 3 + interfaces * 4
           
-          print(f"✅ 复杂度: {score}")
-          print(f"   元素: {total}, 功能: {functions}, 组件: {components}, 接口: {interfaces}, 图表: {diagrams}")
+          print(f"✅ Score: {score}")
+          print(f"   Elements: {total}, Functions: {functions}, Components: {components}, Interfaces: {interfaces}, Diagrams: {diagrams}")
           
-          # 颜色
           if score < 50:
               color = "#4c1"
           elif score < 150:
@@ -67,7 +64,6 @@ jobs:
           else:
               color = "#e05d44"
           
-          # 生成SVG
           svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="190" height="20">
             <linearGradient id="b" x2="0" y2="100%">
               <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
@@ -89,10 +85,9 @@ jobs:
           
           with open(OUTPUT, "w") as f:
               f.write(svg)
-          print("✅ SVG 已生成")
+          print("✅ SVG generated!")
           EOF
       
-      # 用最稳定的方式提交
       - name: Commit and push
         uses: EndBug/add-and-commit@v9
         with:
