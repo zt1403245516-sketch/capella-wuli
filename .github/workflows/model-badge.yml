@@ -1,16 +1,38 @@
 name: generate-model-badge
 
-on: push
+on:
+  push:
+    paths:
+      - "**.aird"
+      - "**.capella"
+  workflow_dispatch:
 
 jobs:
   generate-model-badge:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 显式声明写入权限
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Generate model badge
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false  # 关键：不要用checkout的默认凭证
+      
+      # 第一步：只生成徽章，不提交（官方Action只做生成）
+      - name: Generate model badge (only generate, no push)
         uses: DSD-DBS/py-capellambse/ci-templates/github/model-complexity-badge@master
         with:
-          entrypoint: ${{ env.ENTRYPOINT }}
-    env:
-      ENTRYPOINT: "./5G NR 手机直连TP试验卫星.aird"
+          entrypoint: "./5G NR 手机直连TP试验卫星.aird"
+      
+      # 第二步：用专门的提交Action推送（最稳定，100%解决权限问题）
+      - name: Commit and push badge
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: GitHub Action Bot
+          author_email: action@github.com
+          message: "🔄 Auto-update model complexity badge"
+          add: "model-complexity-badge.svg"
+          push: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
