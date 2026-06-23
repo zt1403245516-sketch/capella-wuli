@@ -1,25 +1,25 @@
 {
   "revision": "main",
-  "commit_hash": "93b763a257ed",
+  "commit_hash": "eed6bc9cfdfe",
   "layers": {
     "OA": {
       "auto_score": 0.0,
-      "objects": 1,
+      "objects": 0,
       "diagrams": 13
     },
     "SA": {
       "auto_score": 0.0,
-      "objects": 2,
+      "objects": 0,
       "diagrams": 3
     },
     "LA": {
       "auto_score": 0.0,
-      "objects": 3,
+      "objects": 0,
       "diagrams": 8
     },
     "PA": {
       "auto_score": 0.0,
-      "objects": 4,
+      "objects": 0,
       "diagrams": 7
     }
   }
