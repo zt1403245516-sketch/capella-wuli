@@ -60,8 +60,16 @@ def analyze_with_capellambse(model_path):
                     objects = len(list(layer.all_objects)) if hasattr(layer, 'all_objects') else 0
                     diagrams = len(list(layer.diagrams)) if hasattr(layer, 'diagrams') else 0
 
+                    target_diagrams = 20
+                    diagram_score = min(diagrams / target_diagrams, 1.0) if target_diagrams > 0 else 0.0
+
                     target_objects = 50
-                    auto_score = min(objects / target_objects, 1.0) if target_objects > 0 else 0.0
+                    object_score = min(objects / target_objects, 1.0) if target_objects > 0 else 0.0
+
+                    if objects > 0:
+                        auto_score = 0.7 * diagram_score + 0.3 * object_score
+                    else:
+                        auto_score = diagram_score
 
                     layers[layer_name] = {
                         "auto_score": round(auto_score, 2),
