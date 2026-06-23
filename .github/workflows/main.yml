@@ -1,0 +1,36 @@
+name: Generate Model Progress
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  generate-model-progress:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install capellambse
+
+      - name: Analyze Capella model
+        run: |
+          python .github/scripts/analyze_model.py \
+            --input "5G NR 手机直连TP试验卫星.aird" \
+            --output model-design-progress.json
+
+      - name: Upload progress artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generate-model-progress
+          path: model-design-progress.json
+          retention-days: 90
