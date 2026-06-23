@@ -4,22 +4,22 @@
   "layers": {
     "OA": {
       "auto_score": 0.0,
-      "objects": 0,
+      "objects": 1,
       "diagrams": 13
     },
     "SA": {
       "auto_score": 0.0,
-      "objects": 0,
+      "objects": 2,
       "diagrams": 3
     },
     "LA": {
       "auto_score": 0.0,
-      "objects": 0,
+      "objects": 3,
       "diagrams": 8
     },
     "PA": {
       "auto_score": 0.0,
-      "objects": 0,
+      "objects": 4,
       "diagrams": 7
     }
   }
