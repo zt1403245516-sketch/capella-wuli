@@ -1,4 +1,4 @@
-name: Generate Model Progress
+name: generate-model-progress
 
 on:
   push:
