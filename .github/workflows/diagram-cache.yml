@@ -1,0 +1,47 @@
+name: update-capella-diagram-cache
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  update-diagram-cache:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install capellambse
+
+      - name: Export diagrams
+        run: |
+          python .github/scripts/export_diagrams.py \
+            --input "5G NR 手机直连TP试验卫星.aird" \
+            --output ./diagram_cache
+
+      - name: Upload diagram cache artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagram_cache
+          path: diagram_cache
+
+      - name: Push diagram cache to orphan branch
+        run: |
+          DERIVED_BRANCH_NAME="diagram-cache/main"
+          git switch --orphan "$DERIVED_BRANCH_NAME"
+          git add diagram_cache
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: Update diagram cache"
+          git push --set-upstream origin "$DERIVED_BRANCH_NAME" --force
